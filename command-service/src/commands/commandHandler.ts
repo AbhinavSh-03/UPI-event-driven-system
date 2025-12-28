@@ -1,5 +1,5 @@
 import { EventStore } from "../event-store/eventStore";
-import { IdempotencyStore } from "../idempotency/idempotencyStore";
+import { IIdempotencyStore } from "../idempotency/IIdempotencyStore";
 import { CommandValidator } from "./commandValidator";
 import { InitiatePaymentCommand } from "../../../shared/domain/commands/payment.commands";
 import { PaymentAggregate } from "../../../shared/domain/aggregates/payment.aggregates";
@@ -8,9 +8,9 @@ import { IEventBus } from "../event-bus/IEventBus";
 export class CommandHandler {
   constructor(
     private readonly eventStore: EventStore,
-    private readonly idempotencyStore: IdempotencyStore,
+    private readonly idempotencyStore: IIdempotencyStore,
     private readonly eventBus: IEventBus
-  ) {}
+  ) { }
 
   async handleInitiatePayment(
     command: InitiatePaymentCommand,
@@ -18,9 +18,11 @@ export class CommandHandler {
   ): Promise<string> {
 
     // Idempotency check
-    if (this.idempotencyStore.has(idempotencyKey)) {
-      return this.idempotencyStore.get(idempotencyKey)!;
+    if (await this.idempotencyStore.has(idempotencyKey)) {
+      const existing = await this.idempotencyStore.get(idempotencyKey);
+      return existing!;
     }
+
 
     // Validate command
     CommandValidator.validateInitiatePayment(command);
@@ -43,7 +45,7 @@ export class CommandHandler {
     await this.eventBus.publish([event]);
 
     // Mark idempotency AFTER successful append
-    this.idempotencyStore.mark(idempotencyKey,command.payload.paymentId);
+    this.idempotencyStore.mark(idempotencyKey, command.payload.paymentId);
 
     return command.payload.paymentId;
   }

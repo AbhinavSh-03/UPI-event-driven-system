@@ -13,9 +13,23 @@ import { GetTransactionHandler } from "../../query-service/src/handlers/getTrans
 
 export const routes = express.Router();
 
-// Query handlers
-const getBalanceHandler = new GetBalanceHandler(accountReadRepository);
-const getTransactionHandler = new GetTransactionHandler(transactionReadRepository);
+/**
+ * Lazily resolve query handlers AFTER async bootstrap.
+ * Prevents undefined repository access.
+ */
+function resolveBalanceHandler(): GetBalanceHandler {
+  if (!accountReadRepository) {
+    throw new Error("AccountReadRepository not initialized");
+  }
+  return new GetBalanceHandler(accountReadRepository);
+}
+
+function resolveTransactionHandler(): GetTransactionHandler {
+  if (!transactionReadRepository) {
+    throw new Error("TransactionReadRepository not initialized");
+  }
+  return new GetTransactionHandler(transactionReadRepository);
+}
 
 //
 // WRITE SIDE — COMMANDS
@@ -54,9 +68,8 @@ routes.get(
   "/accounts/:id/balance",
   rateLimiter,
   (req: Request, res: Response) => {
-    return res.json(
-      getBalanceHandler.execute(req.params.id)
-    );
+    const handler = resolveBalanceHandler();
+    return res.json(handler.execute(req.params.id));
   }
 );
 
@@ -64,8 +77,7 @@ routes.get(
   "/payments/:id/history",
   rateLimiter,
   (req: Request, res: Response) => {
-    return res.json(
-      getTransactionHandler.execute(req.params.id)
-    );
+    const handler = resolveTransactionHandler();
+    return res.json(handler.execute(req.params.id));
   }
 );

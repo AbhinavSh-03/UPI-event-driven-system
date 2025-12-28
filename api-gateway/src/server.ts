@@ -1,13 +1,27 @@
 import express from "express";
 import { routes } from "./routes";
+import { initCommandService } from "../../command-service/src/bootstrap";
 
-const app = express();
+async function startServer() {
+  const app = express();
 
-// 🔒 REQUIRED to parse JSON bodies
-app.use(express.json());
+  // 🔒 REQUIRED to parse JSON bodies
+  app.use(express.json());
 
-app.use("/", routes);
+  // Routes
+  app.use("/", routes);
 
-app.listen(3000, () => {
-  console.log("🚀 API Gateway running on port 3000");
-});
+  const PORT = 3000;
+
+  app.listen(PORT, () => {
+    console.log(`🚀 API Gateway running on port ${PORT}`);
+  });
+}
+
+// 🔥 Bootstrap infra FIRST, then start server
+initCommandService()
+  .then(startServer)
+  .catch((err) => {
+    console.error("❌ Failed to start API Gateway", err);
+    process.exit(1);
+  });

@@ -14,6 +14,10 @@ export class InMemoryEventRepository implements IEventRepository {
       .sort((a, b) => a.version - b.version);
   }
 
+  async getAllEvents(): Promise<BaseEvent[]> {
+  return this.events;
+}
+
   async appendEvent(event: BaseEvent): Promise<void> {
     const conflict = this.events.find(
       e =>
