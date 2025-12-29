@@ -147,6 +147,7 @@ upi-event-driven-system/
 ├── docker-compose.yml
 ├── .env
 
+```
 ---
 
 ## Event Store
