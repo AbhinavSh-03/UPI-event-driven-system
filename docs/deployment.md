@@ -1,7 +1,6 @@
 
 ---
 
-````md
 # Deployment Guide (Docker + AWS EC2)
 
 This document describes how to deploy the **UPI Event-Driven Payment System**
