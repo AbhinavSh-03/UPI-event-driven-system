@@ -13,6 +13,16 @@ import { GetTransactionHandler } from "../../query-service/src/handlers/getTrans
 
 export const routes = express.Router();
 
+// HEALTH CHECK
+//
+routes.get("/health", (_req: Request, res: Response) => {
+  res.status(200).json({
+    status: "UP",
+    service: "api-gateway",
+    timestamp: new Date().toISOString()
+  });
+});
+
 /**
  * Lazily resolve query handlers AFTER async bootstrap.
  * Prevents undefined repository access.
