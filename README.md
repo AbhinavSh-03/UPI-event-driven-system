@@ -135,6 +135,7 @@ This system prioritizes **correctness, idempotency, replayability, and failure r
 
 ## Folder Structure
 
+```text
 upi-event-driven-system/
 ├── api-gateway/        # Single runtime container
 ├── command-service/    # Write side (CQRS)
