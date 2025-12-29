@@ -27,19 +27,28 @@ This system prioritizes **correctness, idempotency, replayability, and failure r
 ### High-Level Architecture
 
 ```mermaid
-flowchart TD
+    flowchart TD
     Client[Client]
 
-    APIGW[API Gateway<br/>• Validation<br/>• Rate Limiting<br/>• Idempotency]
-    CMD[Command Service<br/>(Write Side)]
-    STORE[(PostgreSQL<br/>Event Store<br/>Append-Only)]
-    BUS[Event Bus]
-    CONSUMERS[Consumers / Projections]
-    READ[Read Models<br/>(Query Side)]
+    APIGW["API Gateway
+    Validation
+    Rate Limiting
+    Idempotency"]
 
-    Client -->|HTTP| APIGW
+    CMD["Command Service
+    Write Side"]
+
+    STORE["PostgreSQL Event Store
+    Append Only"]
+
+    BUS[Event Bus]
+    CONSUMERS["Consumers and Projections"]
+    READ["Read Models
+    Query Side"]
+
+    Client --> APIGW
     APIGW --> CMD
-    CMD -->|Events| STORE
+    CMD --> STORE
     STORE --> BUS
     BUS --> CONSUMERS
     CONSUMERS --> READ
@@ -57,16 +66,24 @@ flowchart TD
 ## Write Path (Command Flow)
 
 ```mermaid
-flowchart TD
+    flowchart TD
     Client[Client]
 
-    POST[POST /payments]
+    POST["POST payments"]
     APIGW[API Gateway]
-    IDEMP[Idempotency Check<br/>(Redis)]
+    IDEMP["Idempotency Check
+    Redis"]
+
     CMD[Command Handler]
-    AGG[Aggregate Reconstruction<br/>(Replay Events)]
-    DECIDE[Decide Next Event<br/>(PaymentInitiated)]
-    STORE[(Event Store<br/>PostgreSQL)]
+    AGG["Aggregate Reconstruction
+    Replay Events"]
+
+    DECIDE["Decide Event
+    PaymentInitiated"]
+
+    STORE["Event Store
+    PostgreSQL"]
+
     PUB[Publish Event]
 
     Client --> POST
@@ -77,6 +94,7 @@ flowchart TD
     AGG --> DECIDE
     DECIDE --> STORE
     STORE --> PUB
+
 ```
 
 **Guarantees**
@@ -91,13 +109,13 @@ flowchart TD
 ## Read Path (Query Flow)
 
 ```mermaid
-flowchart TD
+    flowchart TD
     Client[Client]
 
-    GET[GET /accounts/{id}/balance]
+    GET["GET account balance"]
     APIGW[API Gateway]
     QUERY[Query Service]
-    READMODEL[Account Balance Projection]
+    READMODEL["Account Balance Projection"]
     RESP[Response]
 
     Client --> GET
